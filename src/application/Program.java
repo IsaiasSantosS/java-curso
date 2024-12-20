@@ -13,49 +13,69 @@ import db.DB;
 public class Program {
 
 	public static void main(String[] args) {
+		Connection conn = null;
+		PreparedStatement st = null;
+
+		try {
+			conn = DB.getConnection();
+
+			st = conn.prepareStatement(
+					"UPDATE seller " + "SET BaseSalary = BaseSalary + ? " + "WHERE " + "(DepartmentId = ? )");
+
+			st.setDouble(1, 200);
+			st.setInt(2, 2);
+
+			int rowsAffected = st.executeUpdate();
+
+			System.out.println("Done! Rows affected: " + rowsAffected);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DB.closeStatement(st);
+			DB.closeConnection();
+		}
+
+	}
+
+	public void insert() {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 		Connection conn = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
 			conn = DB.getConnection();
-			
-			st = conn.prepareStatement(
-					"INSERT INTO seller "
-					+"(Name, Email, BirthDate, BaseSalary, DepartmentID) "
-					+"VALUES "
-					+"(?,?,?,?,?)",
-					Statement.RETURN_GENERATED_KEYS);
-			
+
+			st = conn.prepareStatement("INSERT INTO seller " + "(Name, Email, BirthDate, BaseSalary, DepartmentID) "
+					+ "VALUES " + "(?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+
 			st.setString(1, "Carl Purple");
 			st.setString(2, "carl@gmail.com");
 			st.setDate(3, new java.sql.Date(sdf.parse("22/04/1995").getTime()));
 			st.setDouble(4, 3000);
 			st.setInt(5, 4);
-			
-			int rowsAffected  = st.executeUpdate();
-			
-			if (rowsAffected > 0 ) {
+
+			int rowsAffected = st.executeUpdate();
+
+			if (rowsAffected > 0) {
 				rs = st.getGeneratedKeys();
 				while (rs.next()) {
 					int id = rs.getInt(1);
-					System.out.println("Done! Id = " +id);
+					System.out.println("Done! Id = " + id);
 				}
 			} else {
 				System.out.println("No ");
-			}	
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-		} catch(ParseException e) {
+		} catch (ParseException e) {
 			e.printStackTrace();
 		} finally {
 			DB.closeStatement(st);
 			DB.closeResulSet(rs);
 			DB.closeConnection();
 		}
-
 	}
-	
+
 	public void lerDados() {
 		Connection conn = null;
 		Statement st = null;
@@ -64,17 +84,17 @@ public class Program {
 			conn = DB.getConnection();
 			st = conn.createStatement();
 			rs = st.executeQuery("select * from department");
-			
-			while(rs.next()) {
+
+			while (rs.next()) {
 				System.out.println(rs.getInt("Id") + ", " + rs.getString("Name"));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			DB.closeResulSet(rs);	
-			DB.closeStatement(st);	
-			DB.closeConnection();	
-		}	
+			DB.closeResulSet(rs);
+			DB.closeStatement(st);
+			DB.closeConnection();
+		}
 	}
 
 }
