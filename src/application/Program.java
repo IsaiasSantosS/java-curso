@@ -15,6 +15,36 @@ public class Program {
 
 	public static void main(String[] args) {
 		Connection conn = null;
+		Statement st = null;
+
+		try {
+			conn = DB.getConnection();
+			conn.setAutoCommit(false);
+
+			st = conn.createStatement();
+
+			int rows1 = st.executeUpdate("UPDATE seller SET BaseSalary = 2090 WHERE DepartmentId = 1");
+			st.executeUpdate("DELETE FROM department WHERE id = 2");
+			int rows2 = st.executeUpdate("UPDATE seller SET BaseSalary = 3090 WHERE DepartmentId = 2");
+			
+			conn.commit();
+			System.out.println("Done! Rows affected: " + rows1);
+			System.out.println("Done! Rows affected: " + rows2);
+		} catch (SQLException e) {
+			try {
+				conn.rollback();
+				throw new DbIntegrityException("Transaction rolled back! Caused by: " + e.getMessage());
+			} catch (SQLException e1) {
+				throw new DbIntegrityException("Error trying to rollback! Caused by: " + e1.getMessage());
+			}
+		} finally {
+			DB.closeStatement(st);
+			DB.closeConnection();
+		}
+	}
+	
+	public void delete() {
+		Connection conn = null;
 		PreparedStatement st = null;
 
 		try {
